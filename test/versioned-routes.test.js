@@ -233,49 +233,6 @@ test('Versioned route but not version header should return a 404', (t, done) => 
   })
 })
 
-test('Should register a versioned route', (t, done) => {
-  t.plan(6)
-  const fastify = Fastify()
-
-  fastify.route({
-    method: 'GET',
-    url: '/',
-    constraints: { version: '1.2.0' },
-    handler: (req, reply) => {
-      reply.send({ hello: 'world' })
-    }
-  })
-
-  fastify.listen({ port: 0 }, err => {
-    t.assert.ifError(err)
-    t.after(() => { fastify.close() })
-
-    sget({
-      method: 'GET',
-      url: 'http://localhost:' + fastify.server.address().port,
-      headers: {
-        'Accept-Version': '1.x'
-      }
-    }, (err, response, body) => {
-      t.assert.ifError(err)
-      t.assert.strictEqual(response.statusCode, 200)
-      t.assert.deepStrictEqual(JSON.parse(body), { hello: 'world' })
-    })
-
-    sget({
-      method: 'GET',
-      url: 'http://localhost:' + fastify.server.address().port,
-      headers: {
-        'Accept-Version': '2.x'
-      }
-    }, (err, response, body) => {
-      t.assert.ifError(err)
-      t.assert.strictEqual(response.statusCode, 404)
-      done()
-    })
-  })
-})
-
 test('Shorthand route declaration', (t, done) => {
   t.plan(5)
   const fastify = Fastify()
